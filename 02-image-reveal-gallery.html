@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image Reveal Gallery</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: #0a0a0a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Helvetica, Arial, sans-serif;
+    }
+
+    .scene {
+      position: relative;
+      width: 820px;
+      height: 520px;
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: none;
+    }
+
+    /* Base layer: blurred + darkened */
+    .layer-base {
+      position: absolute;
+      inset: 0;
+      background: url('vangogh.png') center / cover no-repeat;
+      filter: blur(6px) brightness(0.28) saturate(0.6);
+      transform: scale(1.05);
+    }
+
+    /* Reveal layer: full quality */
+    .layer-reveal {
+      position: absolute;
+      inset: 0;
+      background: url('vangogh.png') center / cover no-repeat;
+      clip-path: circle(0px at 50% 50%);
+      transition: clip-path 0.04s ease-out;
+    }
+
+    /* Full-reveal state on double-click */
+    .layer-reveal.fully-revealed {
+      clip-path: circle(150% at 50% 50%);
+      transition: clip-path 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Lens ring */
+    .lens-ring {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.35);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .scene:hover .lens-ring {
+      opacity: 1;
+    }
+
+    .scene.fully-revealed .lens-ring {
+      opacity: 0;
+    }
+
+    /* Double-click hint */
+    .hint {
+      position: absolute;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.45);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      pointer-events: none;
+      transition: opacity 0.4s;
+      white-space: nowrap;
+    }
+
+    .scene.fully-revealed .hint {
+      opacity: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="scene" id="scene">
+    <div class="layer-base"></div>
+    <div class="layer-reveal" id="reveal"></div>
+    <div class="lens-ring" id="ring"></div>
+    <div class="hint">Double-click to reveal · Double-click again to reset</div>
+  </div>
+
+  <script>
+    const scene  = document.getElementById('scene');
+    const reveal = document.getElementById('reveal');
+    const ring   = document.getElementById('ring');
+    const RADIUS = 100;
+    let fullyRevealed = false;
+    let mouseX = 0, mouseY = 0;
+
+    scene.addEventListener('mousemove', (e) => {
+      if (fullyRevealed) return;
+      const rect = scene.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+
+      reveal.style.clipPath = `circle(${RADIUS}px at ${mouseX}px ${mouseY}px)`;
+      ring.style.left = mouseX + 'px';
+      ring.style.top  = mouseY + 'px';
+    });
+
+    scene.addEventListener('mouseleave', () => {
+      if (fullyRevealed) return;
+      reveal.style.clipPath = 'circle(0px at 50% 50%)';
+    });
+
+    scene.addEventListener('dblclick', () => {
+      fullyRevealed = !fullyRevealed;
+
+      if (fullyRevealed) {
+        reveal.classList.add('fully-revealed');
+        scene.classList.add('fully-revealed');
+        reveal.style.clipPath = ''; // let the class handle it
+      } else {
+        reveal.classList.remove('fully-revealed');
+        scene.classList.remove('fully-revealed');
+        reveal.style.clipPath = `circle(${RADIUS}px at ${mouseX}px ${mouseY}px)`;
+      }
+    });
+  </script>
+</body>
+</html>

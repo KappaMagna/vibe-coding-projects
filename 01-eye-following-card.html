@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eye Following Card</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: #d97757;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      font-family: Helvetica, Arial, sans-serif;
+    }
+
+    .card {
+      width: 370px;
+      background: #FBF0DC;
+      border-radius: 4px;
+      padding: 18px 18px 32px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.22);
+    }
+
+    /* Orange framed section */
+    .eyes-frame {
+      background: #d97757;
+      width: 100%;
+      aspect-ratio: 1 / 1.1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    .eye {
+      width: 155px;
+      height: 155px;
+      background: #FBF0DC;
+      border-radius: 50%;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .pupil {
+      width: 52px;
+      height: 52px;
+      background: #141413;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: transform 0.07s ease-out;
+      pointer-events: none;
+    }
+
+    /* Text section */
+    .text-section {
+      margin-top: 24px;
+    }
+
+    .color-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 48px;
+      font-weight: 700;
+      color: #141413;
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+
+    .name {
+      font-size: 20px;
+      font-weight: 500;
+      color: #141413;
+      margin-top: 6px;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: #7a7870;
+      margin-top: 20px;
+    }
+
+    /* URL below card */
+    .url-link {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      color: #FBF0DC;
+      text-decoration: underline;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="eyes-frame" id="eyesFrame">
+      <div class="eye" id="eyeLeft">
+        <div class="pupil" id="pupilLeft"></div>
+      </div>
+      <div class="eye" id="eyeRight">
+        <div class="pupil" id="pupilRight"></div>
+      </div>
+    </div>
+
+    <div class="text-section">
+      <div class="color-label">#D97757</div>
+      <div class="name">Claude Code</div>
+      <div class="subtitle">Easy Design Workflow</div>
+    </div>
+  </div>
+
+  <a class="url-link" href="https://contento.consulting/" target="_blank">https://contento.consulting/</a>
+
+  <script>
+    const eyes = [
+      { eye: document.getElementById('eyeLeft'),  pupil: document.getElementById('pupilLeft') },
+      { eye: document.getElementById('eyeRight'), pupil: document.getElementById('pupilRight') },
+    ];
+
+    document.addEventListener('mousemove', (e) => {
+      eyes.forEach(({ eye, pupil }) => {
+        const rect = eye.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+
+        const dx = e.clientX - cx;
+        const dy = e.clientY - cy;
+        const angle = Math.atan2(dy, dx);
+
+        const maxTravel = (rect.width / 2) - (pupil.offsetWidth / 2) - 10;
+        const dist = Math.min(Math.hypot(dx, dy), maxTravel);
+
+        const x = Math.cos(angle) * dist;
+        const y = Math.sin(angle) * dist;
+
+        pupil.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+      });
+    });
+
+    document.addEventListener('mouseleave', () => {
+      eyes.forEach(({ pupil }) => {
+        pupil.style.transform = 'translate(-50%, -50%)';
+      });
+    });
+  </script>
+</body>
+</html>
